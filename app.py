@@ -2,7 +2,9 @@ from flask import Flask, render_template, request, redirect
 import mysql.connector
 import time
 
+
 app = Flask(__name__)
+
 
 def get_db_connection():
     # Retry connection for 30 seconds (MySQL takes time to initialize)
@@ -17,7 +19,9 @@ def get_db_connection():
             return conn
         except mysql.connector.Error:
             time.sleep(1)
+
     raise Exception("Could not connect to database")
+
 
 def init_db():
     conn = get_db_connection()
@@ -34,6 +38,7 @@ def init_db():
     cursor.close()
     conn.close()
 
+
 @app.route('/')
 def index():
     conn = get_db_connection()
@@ -44,6 +49,7 @@ def index():
     conn.close()
     return render_template('index.html', todos=todos)
 
+
 @app.route('/add', methods=['POST'])
 def add_todo():
     name = request.form.get('name')
@@ -51,12 +57,20 @@ def add_todo():
     if name and task:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO todos (name, task) VALUES (%s, %s)', (name, task))
+        cursor.execute(
+            'INSERT INTO todos (name, task) VALUES (%s, %s)',
+            (name, task)
+        )
         conn.commit()
         cursor.close()
         conn.close()
     return redirect('/')
 
+
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(
+        host='0.0.0.0',
+        port=5000,
+        debug=True
+    )

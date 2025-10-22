@@ -1,21 +1,34 @@
 import pytest
 from app import app
 
+
 @pytest.fixture
 def client(monkeypatch):
     """Create a Flask test client and mock DB connection."""
-    
+
     # Mock DB connection so it doesn't call MySQL
     class DummyCursor:
-        def execute(self, *args, **kwargs): pass
-        def fetchall(self): 
-            return [{"id": 1, "name": "Test User", "task": "Sample Task"}]
-        def close(self): pass
+        def execute(self, *args, **kwargs):
+            pass
 
+        def fetchall(self):
+            return [
+                {"id": 1, "name": "Test User", "task": "Sample Task"}
+            ]
+
+        def close(self):
+            pass
+
+    
     class DummyConnection:
-        def cursor(self, dictionary=False): return DummyCursor()
-        def commit(self): pass
-        def close(self): pass
+        def cursor(self, dictionary=False):
+            return DummyCursor()
+
+        def commit(self):
+            pass
+
+        def close(self):
+            pass
 
     def dummy_get_db_connection():
         return DummyConnection()
@@ -38,6 +51,12 @@ def test_index_route(client):
 
 def test_add_todo_redirect(client):
     """Test POST /add triggers redirect (no DB errors)."""
-    response = client.post('/add', data={"name": "John", "task": "Do homework"})
+    response = client.post(
+        '/add',
+        data={
+            "name": "John",
+            "task": "Do homework",
+        },
+    )
     # Should redirect back to /
     assert response.status_code in (301, 302)
