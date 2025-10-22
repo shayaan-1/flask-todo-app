@@ -6,20 +6,16 @@ from app import app
 def client(monkeypatch):
     """Create a Flask test client and mock DB connection."""
 
-    # Mock DB connection so it doesn't call MySQL
     class DummyCursor:
         def execute(self, *args, **kwargs):
             pass
 
         def fetchall(self):
-            return [
-                {"id": 1, "name": "Test User", "task": "Sample Task"}
-            ]
+            return [{"id": 1, "name": "Test User", "task": "Sample Task"}]
 
         def close(self):
             pass
 
-    
     class DummyConnection:
         def cursor(self, dictionary=False):
             return DummyCursor()
@@ -33,10 +29,8 @@ def client(monkeypatch):
     def dummy_get_db_connection():
         return DummyConnection()
 
-    # Patch get_db_connection in app
     monkeypatch.setattr("app.get_db_connection", dummy_get_db_connection)
 
-    # Create Flask test client
     with app.test_client() as client:
         yield client
 
@@ -53,10 +47,6 @@ def test_add_todo_redirect(client):
     """Test POST /add triggers redirect (no DB errors)."""
     response = client.post(
         '/add',
-        data={
-            "name": "John",
-            "task": "Do homework",
-        },
+        data={"name": "John", "task": "Do homework"},
     )
-    # Should redirect back to /
     assert response.status_code in (301, 302)
