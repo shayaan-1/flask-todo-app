@@ -1,5 +1,14 @@
+import sys
+import os
 import pytest
 from app import app
+
+# Ensure the parent directory is in sys.path for module import
+sys.path.insert(
+    0, os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..')
+        )
+    )
 
 
 @pytest.fixture
@@ -11,7 +20,9 @@ def client(monkeypatch):
             pass
 
         def fetchall(self):
-            return [{"id": 1, "name": "Test User", "task": "Sample Task"}]
+            return [
+                {"id": 1, "name": "Test User", "task": "Sample Task"}
+            ]
 
         def close(self):
             pass
