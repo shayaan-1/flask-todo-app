@@ -1,4 +1,3 @@
-# .github/workflows/ci-cd.yml
 name: CI / Build / Publish
 
 on:
@@ -11,7 +10,7 @@ jobs:
   test-and-lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -25,13 +24,11 @@ jobs:
           pip install -r requirements.txt
           pip install pytest flake8
 
-      - name: Lint
-        run: |
-          flake8 .
+      - name: Lint code
+        run: flake8 .
 
       - name: Run tests
-        run: |
-          pytest -q
+        run: pytest -q
 
   build-and-push:
     needs: test-and-lint
@@ -40,8 +37,9 @@ jobs:
       contents: read
       packages: write
       id-token: write
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up QEMU
@@ -50,17 +48,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to registry (GHCR)
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push image to GHCR
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
-      
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
